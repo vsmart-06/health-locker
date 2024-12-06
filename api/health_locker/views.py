@@ -1,4 +1,5 @@
 from django.http import HttpRequest, JsonResponse, HttpResponse
+from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
 from pydicom import dcmread
 import numpy as np
@@ -58,11 +59,11 @@ def upload_file(request: HttpRequest):
     try:
         user = UserCredentials(user_id = user_id)
     except:
-        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
     
     try:
         HealthLocker.objects.get(user = user, type = file_type, file_name = file.name)
-        return JsonResponse({"error": "A file with that name already exists"}, status = 400)
+        return JsonResponse({"error": "A file with that name already exists"}, status = 403)
     except:
         record = HealthLocker(type = file_type, user = user, file_name = file.name, data = file_data)
         record.save()
@@ -134,3 +135,42 @@ def delete_data(request: HttpRequest):
     if not error:
         return JsonResponse({"message": "Selected files successfully deleted"})
     return JsonResponse({"error": "Some files could not be deleted"}, status = 400)
+
+@csrf_exempt
+def signup(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
+    
+    email = request.POST.get("email")
+    password = request.POST.get("password")
+
+    if not email:
+        return JsonResponse({"error": "'email' field is required"}, status = 400)
+    if not password:
+        return JsonResponse({"error": "'password' field is required"}, status = 400)
+
+    user = UserCredentials.objects.create_user(email = email, password = password)
+    user.save()
+
+    return JsonResponse({"message": "User successfully signed up"})
+
+@csrf_exempt
+def login(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
+    
+    email = request.POST.get("email")
+    password = request.POST.get("password")
+
+    if not email:
+        return JsonResponse({"error": "'email' field is required"}, status = 400)
+    if not password:
+        return JsonResponse({"error": "'password' field is required"}, status = 400)
+
+    user = authenticate(request, email = email, password = password)
+
+    if user:
+        return JsonResponse({"message": "User successfully logged in"})
+    
+    return JsonResponse({"error": "User does not exist"}, status = 401)
+    
