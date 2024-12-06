@@ -134,7 +134,7 @@ def delete_data(request: HttpRequest):
     
     if not error:
         return JsonResponse({"message": "Selected files successfully deleted"})
-    return JsonResponse({"error": "Some files could not be deleted"}, status = 400)
+    return JsonResponse({"error": "Some files could not be deleted"}, status = 520)
 
 @csrf_exempt
 def signup(request: HttpRequest):
