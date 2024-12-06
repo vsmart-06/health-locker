@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import "package:scan_and_upload/pages/records_page.dart";
-import "package:scan_and_upload/pages/upload_page.dart";
-import 'package:scan_and_upload/widgets/record_template.dart';
+import "package:src/pages/records_page.dart";
+import "package:src/pages/upload_page.dart";
+import 'package:src/widgets/record_template.dart';
 
 void main() {
   runApp(

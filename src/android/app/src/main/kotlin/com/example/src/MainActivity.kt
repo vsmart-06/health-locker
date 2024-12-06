@@ -1,4 +1,4 @@
-package com.example.scan_and_upload
+package com.example.src
 
 import io.flutter.embedding.android.FlutterActivity
 

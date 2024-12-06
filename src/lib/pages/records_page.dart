@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:scan_and_upload/widgets/file_button.dart";
+import "package:src/widgets/file_button.dart";
 
 class Records extends StatefulWidget {
   const Records({super.key});
