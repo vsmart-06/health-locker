@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:file_picker/file_picker.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:http/http.dart";
+import "package:src/services/secure_storage.dart";
 import "package:syncfusion_flutter_pdfviewer/pdfviewer.dart";
 
 class UploadPage extends StatefulWidget {
@@ -13,6 +14,8 @@ class UploadPage extends StatefulWidget {
 }
 
 class _UploadPageState extends State<UploadPage> {
+  late int user_id;
+
   List<String> typeList = [
     "Choose a data type",
     "Diagnostic Reports",
@@ -87,12 +90,11 @@ class _UploadPageState extends State<UploadPage> {
       }
       request.fields["type"] = displayText;
       request.fields["extension"] = type!;
-      request.fields["user_id"] = "1";
+      await loadUserId();
+      request.fields["user_id"] = user_id.toString();
       var response = await Response.fromStream(await request.send());
 
-      Map message = jsonDecode(response.body);
-
-      if (message.containsKey("error")) {
+      if (response.statusCode != 200) {
         setState(() {
           error = true;
         });
@@ -106,6 +108,15 @@ class _UploadPageState extends State<UploadPage> {
         displayText = typeList.first;
         sent = true;
         error = false;
+      });
+    }
+  }
+
+  Future<void> loadUserId() async {
+    String? num = await SecureStorage.read("user_id");
+    if (num != null) {
+      setState(() {
+        user_id = int.parse(num);
       });
     }
   }

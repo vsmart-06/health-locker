@@ -149,10 +149,13 @@ def signup(request: HttpRequest):
     if not password:
         return JsonResponse({"error": "'password' field is required"}, status = 400)
 
-    user = UserCredentials.objects.create_user(email = email, password = password)
-    user.save()
+    try:
+        user = UserCredentials.objects.create_user(email = email, password = password)
+        user.save()
+    except Exception as e:
+        return JsonResponse({"error": "A user with that email already exists"}, status = 409)
 
-    return JsonResponse({"message": "User successfully signed up"})
+    return JsonResponse({"message": "User successfully signed up", "user_id": user.user_id})
 
 @csrf_exempt
 def login(request: HttpRequest):
@@ -170,7 +173,7 @@ def login(request: HttpRequest):
     user = authenticate(request, email = email, password = password)
 
     if user:
-        return JsonResponse({"message": "User successfully logged in"})
+        return JsonResponse({"message": "User successfully logged in", "user_id": user.user_id})
     
-    return JsonResponse({"error": "User does not exist"}, status = 401)
+    return JsonResponse({"error": "Email or password is incorrect"}, status = 401)
     

@@ -2,6 +2,7 @@
 
 import "package:flutter/material.dart";
 import "package:http/http.dart";
+import "package:src/services/secure_storage.dart";
 import "dart:convert";
 
 import "package:syncfusion_flutter_pdfviewer/pdfviewer.dart";
@@ -15,6 +16,8 @@ class RecordsTemplate extends StatefulWidget {
 }
 
 class _RecordsTemplateState extends State<RecordsTemplate> {
+  late int user_id;
+
   List<Widget> rowData = [];
   late Map data;
   List selected = [];
@@ -22,9 +25,10 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   String baseUrl = "http://127.0.0.1:8000/health_locker";
 
   void getData() async {
+    await loadUserId();
     var response = await post(
         Uri.parse(baseUrl + "/retrieve-data/"),
-        body: {"type": widget.title, "user_id": "1"});
+        body: {"type": widget.title, "user_id": user_id.toString()});
     var info = jsonDecode(response.body)["data"];
     setState(() {
       data = info;
@@ -163,17 +167,29 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
       }
     }
     files += "]";
+
     var response = await post(
         Uri.parse(baseUrl + "/delete-data/"),
-        body: {"type": widget.title, "user_id": "1", "files": files});
-    var info = jsonDecode(response.body);
+        body: {"type": widget.title, "user_id": user_id.toString(), "files": files});
+
+    if (response.statusCode != 200) {
+      print("Error occured");
+      return;
+    }
+
     setState(() {
       selected = [];
     });
+
     getData();
-    if (info.containsKey("error")) {
-      print("Error occured");
-      return;
+  }
+
+  Future<void> loadUserId() async {
+    String? num = await SecureStorage.read("user_id");
+    if (num != null) {
+      setState(() {
+        user_id = int.parse(num);
+      });
     }
   }
 

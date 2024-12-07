@@ -13,7 +13,12 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         user: UserCredentials = self.model(email = email, **kwargs)
         user.set_password(password)
-        user.save(using = self._db)
+
+        try:
+            user.save(using = self._db)
+        except:
+            raise Exception("A user with that email already exists")
+
         return user
     
     def create_superuser(self, email, password, **kwargs):
