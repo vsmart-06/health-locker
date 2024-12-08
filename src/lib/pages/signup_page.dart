@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 import "package:http/http.dart";
 import "package:src/services/secure_storage.dart";
 import "dart:core";
@@ -16,6 +17,8 @@ class _SignupState extends State<Signup> {
   String password = "";
   String? errorText;
   List<bool> errors = [false, false];
+  String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
+
 
   String baseUrl = "http://127.0.0.1:8000/health_locker";
 
@@ -55,7 +58,10 @@ class _SignupState extends State<Signup> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Signup"),
+          title: Text(
+            "Sign Up",
+            style: TextStyle(fontFamily: primaryFont)
+          ),
           centerTitle: true,
         ),
         body: Center(
@@ -67,7 +73,9 @@ class _SignupState extends State<Signup> {
                   decoration: InputDecoration(
                       hintText: "Email",
                       border: OutlineInputBorder(),
-                      errorText: errors[0] ? "Invalid email" : null),
+                      errorText: errors[0] ? "Invalid email" : null
+                  ),
+                  style: TextStyle(fontFamily: primaryFont),
                   autofocus: true,
                   onChanged: (value) {
                     setState(() {
@@ -83,6 +91,7 @@ class _SignupState extends State<Signup> {
                       hintText: "Password",
                       border: OutlineInputBorder(),
                       errorText: errors[1] ? "Invalid password" : null),
+                      style: TextStyle(fontFamily: primaryFont),
                   obscureText: true,
                   onChanged: (value) {
                     setState(() {
@@ -91,15 +100,27 @@ class _SignupState extends State<Signup> {
                   },
                 ),
               ),
+              (errorText != null) ? Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Text(errorText!, style: TextStyle(color: Colors.red),),
+              ) : Container(),
               TextButton(
+                  style: ButtonStyle(
+                      minimumSize: WidgetStatePropertyAll(Size(125, 60)),
+                      backgroundColor: WidgetStatePropertyAll(Colors.blue),
+                      foregroundColor: WidgetStatePropertyAll(Colors.white),
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)))),
                   onPressed: () {
                     bool valid = validateInputs();
                     if (valid) signup();
-                  }, child: Text("Signup")),
-              (errorText != null) ? Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(errorText!, style: TextStyle(color: Colors.red),),
-              ) : Container()
+                  },
+                  child:
+                      Text("Sign Up", style: TextStyle(fontFamily: primaryFont))),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextButton(onPressed: () {Navigator.popAndPushNamed(context, "/");}, child: Text("Already have an account? Login here!", style: TextStyle(fontFamily: primaryFont)))),
+              
             ],
           ),
         ));

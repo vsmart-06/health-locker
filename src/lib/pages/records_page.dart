@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 import "package:src/widgets/file_button.dart";
+import "package:src/widgets/logout_button.dart";
 
 class Records extends StatefulWidget {
   const Records({super.key});
@@ -9,12 +11,18 @@ class Records extends StatefulWidget {
 }
 
 class _RecordsState extends State<Records> {
+  String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Scan and Upload"),
+        title: Text(
+          "Scan and Upload",
+          style: TextStyle(fontFamily: primaryFont)
+        ),
         centerTitle: true,
+        actions: [LogoutButton()],
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -4,6 +4,7 @@ import "package:file_picker/file_picker.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:http/http.dart";
 import "package:src/services/secure_storage.dart";
+import "package:src/widgets/logout_button.dart";
 import "package:syncfusion_flutter_pdfviewer/pdfviewer.dart";
 
 class UploadPage extends StatefulWidget {
@@ -125,8 +126,12 @@ class _UploadPageState extends State<UploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Upload a health record"),
+        title: Text(
+          "Upload a health record",
+          style: TextStyle(fontFamily: primaryFont)
+        ),
         centerTitle: true,
+        actions: [LogoutButton()],
       ),
       body: SingleChildScrollView(
           child: Column(children: [

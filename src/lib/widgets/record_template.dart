@@ -1,8 +1,10 @@
 // ignore_for_file: must_be_immutable
 
 import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
 import "package:http/http.dart";
 import "package:src/services/secure_storage.dart";
+import "package:src/widgets/logout_button.dart";
 import "dart:convert";
 
 import "package:syncfusion_flutter_pdfviewer/pdfviewer.dart";
@@ -21,6 +23,8 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   List<Widget> rowData = [];
   late Map data;
   List selected = [];
+
+  String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
 
   String baseUrl = "http://127.0.0.1:8000/health_locker";
 
@@ -203,8 +207,12 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title!),
+        title: Text(
+          widget.title!,
+          style: TextStyle(fontFamily: primaryFont)
+        ),
         centerTitle: true,
+        actions: [LogoutButton()],
       ),
       body: Scaffold(
           body: Padding(
