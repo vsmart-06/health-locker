@@ -10,8 +10,16 @@ class PatientHome extends StatefulWidget {
   State<PatientHome> createState() => _PatientHomeState();
 }
 
-class _PatientHomeState extends State<PatientHome> {
+class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStateMixin {
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
+  late TabController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TabController(length: 2, vsync: this);
+    controller.addListener(() => setState(() {}));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,54 +30,61 @@ class _PatientHomeState extends State<PatientHome> {
         centerTitle: true,
         actions: [LogoutButton()],
         bottom: TabBar(
+          controller: controller,
           tabs: [
             Tab(text: "Records"),
             Tab(text: "Requests")
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: TabBarView(
+        controller: controller,
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                FileButton(
-                    displayText: "Diagnostic Reports",
-                    redirectUrl: "/diagnostics"),
-                FileButton(
-                    displayText: "Discharge Summaries",
-                    redirectUrl: "/discharge"),
-                FileButton(
-                    displayText: "Health Documents", redirectUrl: "/health"),
-                FileButton(
-                    displayText: "Immunization Records",
-                    redirectUrl: "/immunization"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    FileButton(
+                        displayText: "Diagnostic Reports",
+                        redirectUrl: "/diagnostics"),
+                    FileButton(
+                        displayText: "Discharge Summaries",
+                        redirectUrl: "/discharge"),
+                    FileButton(
+                        displayText: "Health Documents", redirectUrl: "/health"),
+                    FileButton(
+                        displayText: "Immunization Records",
+                        redirectUrl: "/immunization"),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    FileButton(
+                        displayText: "OP Consult Records",
+                        redirectUrl: "/op-consult"),
+                    FileButton(
+                        displayText: "Prescriptions",
+                        redirectUrl: "/prescriptions"),
+                    FileButton(
+                        displayText: "Wellness Records", redirectUrl: "/wellness"),
+                    FileButton(displayText: "Invoices", redirectUrl: "/invoices"),
+                  ],
+                ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                FileButton(
-                    displayText: "OP Consult Records",
-                    redirectUrl: "/op-consult"),
-                FileButton(
-                    displayText: "Prescriptions",
-                    redirectUrl: "/prescriptions"),
-                FileButton(
-                    displayText: "Wellness Records", redirectUrl: "/wellness"),
-                FileButton(displayText: "Invoices", redirectUrl: "/invoices"),
-              ],
-            ),
-          ],
-        ),
+          ),
+          Container()
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: (controller.index == 0) ? FloatingActionButton(
           onPressed: () {
             Navigator.pushNamed(context, "/upload");
           },
-          child: Icon(Icons.add)),
+          child: Icon(Icons.add)) : null,
     );
   }
 }
