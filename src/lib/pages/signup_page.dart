@@ -15,6 +15,7 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   String email = "";
   String password = "";
+  String? role;
   String? errorText;
   List<bool> errors = [false, false];
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
@@ -36,7 +37,7 @@ class _SignupState extends State<Signup> {
 
   void signup() async {
     var response = await post(Uri.parse(baseUrl + "/signup/"),
-        body: {"email": email, "password": password});
+        body: {"email": email, "password": password, "role": role});
 
     var info = jsonDecode(response.body);
 
@@ -99,6 +100,48 @@ class _SignupState extends State<Signup> {
                     });
                   },
                 ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: TextButton(
+                    style: ButtonStyle(
+                        minimumSize: WidgetStatePropertyAll(Size(125, 60)),
+                        backgroundColor: WidgetStatePropertyAll((role == null || role != "doctor") ? Colors.transparent : Colors.blue),
+                        foregroundColor: WidgetStatePropertyAll((role == null || role != "doctor") ? Colors.black : Colors.white),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                          side: (role == null || role != "doctor") ? BorderSide(color: Colors.black) : BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(30)))),
+                    onPressed: () {
+                      setState(() {
+                        if (role == null || role != "doctor") role = "doctor";
+                        else role = null;
+                      });
+                    },
+                    child:
+                        Text("Doctor", style: TextStyle(fontFamily: primaryFont))),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: TextButton(
+                    style: ButtonStyle(
+                      minimumSize: WidgetStatePropertyAll(Size(125, 60)),
+                      backgroundColor: WidgetStatePropertyAll((role == null || role != "patient") ? Colors.transparent : Colors.blue),
+                      foregroundColor: WidgetStatePropertyAll((role == null || role != "patient") ? Colors.black : Colors.white),
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        side: (role == null || role != "patient") ? BorderSide(color: Colors.black) : BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(30)))),
+                  onPressed: () {
+                    setState(() {
+                      if (role == null || role != "patient") role = "patient";
+                      else role = null;
+                    });
+                  },
+                  child:
+                      Text("Patient", style: TextStyle(fontFamily: primaryFont))),)
+                ],
               ),
               (errorText != null) ? Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),

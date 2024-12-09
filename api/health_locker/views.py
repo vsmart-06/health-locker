@@ -143,14 +143,17 @@ def signup(request: HttpRequest):
     
     email = request.POST.get("email")
     password = request.POST.get("password")
+    role = request.POST.get("role")
 
     if not email:
         return JsonResponse({"error": "'email' field is required"}, status = 400)
     if not password:
         return JsonResponse({"error": "'password' field is required"}, status = 400)
+    if not role:
+        return JsonResponse({"error": "'role' field is required"}, status = 400)
 
     try:
-        user = UserCredentials.objects.create_user(email = email, password = password)
+        user = UserCredentials.objects.create_user(email = email, password = password, role = role)
         user.save()
     except Exception as e:
         return JsonResponse({"error": "A user with that email already exists"}, status = 409)
@@ -173,7 +176,7 @@ def login(request: HttpRequest):
     user = authenticate(request, email = email, password = password)
 
     if user:
-        return JsonResponse({"message": "User successfully logged in", "user_id": user.user_id})
+        return JsonResponse({"message": "User successfully logged in", "user_id": user.user_id, "role": user.role})
     
     return JsonResponse({"error": "Email or password is incorrect"}, status = 401)
     

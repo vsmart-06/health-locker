@@ -30,6 +30,7 @@ class UserManager(BaseUserManager):
 class UserCredentials(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key = True, unique = True, null = False)
     email = models.EmailField(unique = True, null = False)
+    role = models.TextField(choices = [("doctor", "doctor"), ("patient", "patient")], null = False)
     is_staff = models.BooleanField(default = False, null = False)
 
     USERNAME_FIELD = "email"
