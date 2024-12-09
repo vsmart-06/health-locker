@@ -38,8 +38,7 @@ class _LoginState extends State<Login> {
     var info = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      await SecureStorage.write("user_id", info["user_id"].toString());
-      await SecureStorage.write("role", info["role"]);
+      await SecureStorage.writeMany({"user_id": info["user_id"].toString(), "role": info["role"], "last_login": DateTime.now().toString()});
       await Navigator.popAndPushNamed(context, "/home");
       return;
     } else if (response.statusCode >= 400) {
@@ -50,8 +49,17 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void checkLogin() async {
-    if (await SecureStorage.read("user_id") != null) Navigator.popAndPushNamed(context, "/home");
+  Future<void> checkLogin() async {
+    String? user_id = await SecureStorage.read("user_id");
+    dynamic date = await SecureStorage.read("last_login");
+    if (date != null) {
+      date = DateTime.parse(date);
+      if (DateTime.now().subtract(Duration(days: 30)).compareTo(date) >= 0) {
+        await SecureStorage.delete();
+        return;
+      }
+    }
+    if (user_id != null) Navigator.popAndPushNamed(context, "/home");
   }
 
   @override

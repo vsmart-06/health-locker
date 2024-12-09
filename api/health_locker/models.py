@@ -44,3 +44,12 @@ class HealthLocker(models.Model):
     type = models.TextField(unique = False, null = False)
     file_name = models.TextField(unique = False, null = False)
     data = models.JSONField(unique = False, null = False)
+
+
+class DataRequests(models.Model):
+    request_id = models.AutoField(primary_key = True, unique = True, null = False)
+    requestor = models.ForeignKey(UserCredentials, related_name = "requestor", on_delete = models.CASCADE, null = False)
+    donor = models.ForeignKey(UserCredentials, related_name = "donor", on_delete = models.CASCADE, null = False)
+    type = models.TextField(unique = False, null = False)
+    end_date = models.DateTimeField(unique = False, null = False)
+    approved = models.BooleanField(default = False, null = False)

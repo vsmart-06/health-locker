@@ -11,7 +11,7 @@ class LogoutButton extends StatelessWidget {
 
     return TextButton.icon(
       onPressed: () async {
-        await SecureStorage.delete("user_id");
+        await SecureStorage.delete();
         Navigator.pushNamedAndRemoveUntil(context, "/", (route) => route == "/");
       }, 
       icon: Icon(Icons.logout),
