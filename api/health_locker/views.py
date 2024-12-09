@@ -155,10 +155,10 @@ def signup(request: HttpRequest):
     try:
         user = UserCredentials.objects.create_user(email = email, password = password, role = role)
         user.save()
-    except Exception as e:
+    except Exception:
         return JsonResponse({"error": "A user with that email already exists"}, status = 409)
 
-    return JsonResponse({"message": "User successfully signed up", "user_id": user.user_id})
+    return JsonResponse({"message": "User successfully signed up", "user_id": user.user_id, "role": user.role})
 
 @csrf_exempt
 def login(request: HttpRequest):
