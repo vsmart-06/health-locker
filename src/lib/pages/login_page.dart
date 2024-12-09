@@ -38,10 +38,9 @@ class _LoginState extends State<Login> {
     var info = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      int user_id = info["user_id"];
-      await SecureStorage.write("user_id", user_id.toString());
-      await Navigator.popAndPushNamed(context, "/home",
-          arguments: {"user_id": user_id});
+      await SecureStorage.write("user_id", info["user_id"].toString());
+      await SecureStorage.write("role", info["role"]);
+      await Navigator.popAndPushNamed(context, "/home");
       return;
     } else if (response.statusCode >= 400) {
       setState(() {
@@ -49,6 +48,17 @@ class _LoginState extends State<Login> {
       });
       return;
     }
+  }
+
+  void checkLogin() async {
+    if (await SecureStorage.read("user_id") != null) Navigator.popAndPushNamed(context, "/home");
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLogin();
   }
 
   @override

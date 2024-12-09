@@ -42,8 +42,8 @@ class _SignupState extends State<Signup> {
     var info = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      int user_id = info["user_id"];
-      await SecureStorage.write("user_id", user_id.toString());
+      await SecureStorage.write("user_id", info["user_id"].toString());
+      await SecureStorage.write("role", info["role"]);
       await Navigator.popAndPushNamed(context, "/home");
       return;
 
