@@ -35,6 +35,7 @@ class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStat
             Tab(text: "Records"),
             Tab(text: "Requests")
           ],
+          labelStyle: TextStyle(fontFamily: primaryFont),
         ),
       ),
       body: TabBarView(

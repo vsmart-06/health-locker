@@ -179,4 +179,26 @@ def login(request: HttpRequest):
         return JsonResponse({"message": "User successfully logged in", "user_id": user.user_id, "role": user.role})
     
     return JsonResponse({"error": "Email or password is incorrect"}, status = 401)
+
+@csrf_exempt
+def fetch_requests(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
+    
+    user_id = int(request.POST.get("user_id"))
+    role = request.POST.get("role")
+
+    try:
+        user = UserCredentials(user_id = user_id)
+    except:
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+
+    if role == "doctor":
+        records = DataRequests.objects.filter(requestor = user)
+    else:
+        records = DataRequests.objects.filter(donor = user)
+
+    records = list(records.values())
+
+    return JsonResponse({"data": records})
     

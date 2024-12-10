@@ -8,7 +8,9 @@ class SecureStorage {
   }
 
   static Future<void> writeMany(Map<String, String> pairs) async {
-    pairs.forEach((key, value) async => await storage.write(key: key, value: value));
+    for (String key in pairs.keys) {
+      await storage.write(key: key, value: pairs[key]);
+    }
   }
 
   static Future<dynamic> read([String? key]) async {

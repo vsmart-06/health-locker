@@ -34,6 +34,7 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
             Tab(text: "Patients"),
             Tab(text: "Requests")
           ],
+          labelStyle: TextStyle(fontFamily: primaryFont),
         ),
       ),
       body: TabBarView(
