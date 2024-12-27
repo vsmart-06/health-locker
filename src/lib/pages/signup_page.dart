@@ -15,7 +15,7 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   String email = "";
   String password = "";
-  String? role;
+  String role = "patient";
   String? errorText;
   List<bool> errors = [false, false];
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
@@ -107,39 +107,38 @@ class _SignupState extends State<Signup> {
                     padding: const EdgeInsets.all(20.0),
                     child: TextButton(
                     style: ButtonStyle(
+                      minimumSize: WidgetStatePropertyAll(Size(125, 60)),
+                      backgroundColor: WidgetStatePropertyAll((role != "patient") ? Colors.transparent : Colors.blue),
+                      foregroundColor: WidgetStatePropertyAll((role != "patient") ? Colors.black : Colors.white),
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        side: (role != "patient") ? BorderSide(color: Colors.black) : BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(30)))),
+                  onPressed: () {
+                    setState(() {
+                      if (role != "patient") role = "patient";
+                    });
+                  },
+                  child:
+                      Text("Patient", style: TextStyle(fontFamily: primaryFont))),),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: TextButton(
+                    style: ButtonStyle(
                         minimumSize: WidgetStatePropertyAll(Size(125, 60)),
-                        backgroundColor: WidgetStatePropertyAll((role == null || role != "doctor") ? Colors.transparent : Colors.blue),
-                        foregroundColor: WidgetStatePropertyAll((role == null || role != "doctor") ? Colors.black : Colors.white),
+                        backgroundColor: WidgetStatePropertyAll((role != "doctor") ? Colors.transparent : Colors.blue),
+                        foregroundColor: WidgetStatePropertyAll((role != "doctor") ? Colors.black : Colors.white),
                         shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          side: (role == null || role != "doctor") ? BorderSide(color: Colors.black) : BorderSide(color: Colors.transparent),
+                          side: (role != "doctor") ? BorderSide(color: Colors.black) : BorderSide(color: Colors.transparent),
                             borderRadius: BorderRadius.circular(30)))),
                     onPressed: () {
                       setState(() {
-                        if (role == null || role != "doctor") role = "doctor";
-                        else role = null;
+                        if (role != "doctor") role = "doctor";
                       });
                     },
                     child:
                         Text("Doctor", style: TextStyle(fontFamily: primaryFont))),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: TextButton(
-                    style: ButtonStyle(
-                      minimumSize: WidgetStatePropertyAll(Size(125, 60)),
-                      backgroundColor: WidgetStatePropertyAll((role == null || role != "patient") ? Colors.transparent : Colors.blue),
-                      foregroundColor: WidgetStatePropertyAll((role == null || role != "patient") ? Colors.black : Colors.white),
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        side: (role == null || role != "patient") ? BorderSide(color: Colors.black) : BorderSide(color: Colors.transparent),
-                          borderRadius: BorderRadius.circular(30)))),
-                  onPressed: () {
-                    setState(() {
-                      if (role == null || role != "patient") role = "patient";
-                      else role = null;
-                    });
-                  },
-                  child:
-                      Text("Patient", style: TextStyle(fontFamily: primaryFont))),)
+                  
                 ],
               ),
               (errorText != null) ? Padding(

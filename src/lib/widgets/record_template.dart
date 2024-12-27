@@ -3,6 +3,7 @@
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:http/http.dart";
+import "package:loading_animation_widget/loading_animation_widget.dart";
 import "package:src/services/secure_storage.dart";
 import "package:src/widgets/logout_button.dart";
 import "dart:convert";
@@ -19,6 +20,7 @@ class RecordsTemplate extends StatefulWidget {
 
 class _RecordsTemplateState extends State<RecordsTemplate> {
   late int user_id;
+  bool login = false;
 
   List<Widget> rowData = [];
   late Map data;
@@ -31,7 +33,7 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   void getData() async {
     await loadUserId();
     var response = await post(
-        Uri.parse(baseUrl + "/retrieve-data/"),
+        Uri.parse(baseUrl + "/fetch-data/"),
         body: {"type": widget.title, "user_id": user_id.toString()});
     var info = jsonDecode(response.body)["data"];
     setState(() {
@@ -188,12 +190,28 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
     getData();
   }
 
+  Future<bool> checkLogin() async {
+    Map<String, String> info = await SecureStorage.read();
+    if (info["last_login"] != null) {
+      DateTime date = DateTime.parse(info["last_login"]!);
+      if (DateTime.now().subtract(Duration(days: 30)).compareTo(date) >= 0) {
+        return false;
+      }
+    }
+    return (info["user_id"] != null);
+  }
+
   Future<void> loadUserId() async {
-    String? num = await SecureStorage.read("user_id");
-    if (num != null) {
+    if (await checkLogin()) {
+      String? num = await SecureStorage.read("user_id");
       setState(() {
-        user_id = int.parse(num);
+        user_id = int.parse(num!);
+        login = true;
       });
+    }
+    else {
+      await SecureStorage.delete();
+      Navigator.pushNamedAndRemoveUntil(context, "/", (route) => route == "/");
     }
   }
 
@@ -205,6 +223,7 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
 
   @override
   Widget build(BuildContext context) {
+    if (!login) return LoadingAnimationWidget.inkDrop(color: Colors.blue, size: 100);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -215,7 +234,7 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
         actions: [LogoutButton()],
       ),
       body: Scaffold(
-          body: Padding(
+          body: rowData.isEmpty ? Center(child: LoadingAnimationWidget.inkDrop(color: Colors.blue, size: 100)) : Padding(
               padding: const EdgeInsets.all(20.0),
               child: GridView.count(
                 childAspectRatio:

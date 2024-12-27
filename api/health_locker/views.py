@@ -70,7 +70,7 @@ def upload_file(request: HttpRequest):
         return JsonResponse({"message": "File successfully added"})
 
 @csrf_exempt
-def retrieve_data(request: HttpRequest):
+def fetch_data(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
     
@@ -186,17 +186,32 @@ def fetch_requests(request: HttpRequest):
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
     
     user_id = int(request.POST.get("user_id"))
+    second_id = request.POST.get("second_id")
     role = request.POST.get("role")
 
     try:
         user = UserCredentials(user_id = user_id)
     except:
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+    
+    if second_id:
+        second_id = int(second_id)
+
+        try:
+            second = UserCredentials(user_id = second_id)
+        except:
+            return JsonResponse({"error": "A user with this second ID does not exist"}, status = 400)
 
     if role == "doctor":
         records = DataRequests.objects.filter(requestor = user)
+        if second_id:
+            records.filter(donor = second)
+
     else:
         records = DataRequests.objects.filter(donor = user)
+        if second_id:
+            records.filter(requestor = second)
+
 
     records = list(records.values())
 
