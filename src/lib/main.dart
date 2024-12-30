@@ -16,8 +16,7 @@ void main() {
       "/diagnostics": (context) => RecordsTemplate(title: "Diagnostic Reports"),
       "/discharge": (context) => RecordsTemplate(title: "Discharge Summaries"),
       "/health": (context) => RecordsTemplate(title: "Health Documents"),
-      "/immunization": (context) =>
-          RecordsTemplate(title: "Immunization Records"),
+      "/immunization": (context) => RecordsTemplate(title: "Immunization Records"),
       "/op-consult": (context) => RecordsTemplate(title: "OP Consult Records"),
       "/prescriptions": (context) => RecordsTemplate(title: "Prescriptions"),
       "/wellness": (context) => RecordsTemplate(title: "Wellness Records"),

@@ -8,6 +8,7 @@ import io
 import base64
 from health_locker.models import *
 import json
+import datetime
 
 def dicom_to_png(image):
     png = (np.maximum(image, 0) / image.max()) * 255.0
@@ -57,7 +58,7 @@ def upload_file(request: HttpRequest):
     }
     
     try:
-        user = UserCredentials(user_id = user_id)
+        user = UserCredentials.objects.get(user_id = user_id)
     except:
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
     
@@ -78,7 +79,7 @@ def fetch_data(request: HttpRequest):
     user_id = int(request.POST.get("user_id"))
 
     try:
-        user = UserCredentials(user_id = user_id)
+        user = UserCredentials.objects.get(user_id = user_id)
     except:
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
 
@@ -120,7 +121,7 @@ def delete_data(request: HttpRequest):
     file_type = request.POST.get("type")
 
     try:
-        user = UserCredentials(user_id = user_id)
+        user = UserCredentials.objects.get(user_id = user_id)
     except:
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
 
@@ -190,7 +191,7 @@ def fetch_requests(request: HttpRequest):
     role = request.POST.get("role")
 
     try:
-        user = UserCredentials(user_id = user_id)
+        user = UserCredentials.objects.get(user_id = user_id)
     except:
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
     
@@ -198,7 +199,7 @@ def fetch_requests(request: HttpRequest):
         second_id = int(second_id)
 
         try:
-            second = UserCredentials(user_id = second_id)
+            second = UserCredentials.objects.get(user_id = second_id)
         except:
             return JsonResponse({"error": "A user with this second ID does not exist"}, status = 400)
 
@@ -215,5 +216,80 @@ def fetch_requests(request: HttpRequest):
 
     records = list(records.values())
 
-    return JsonResponse({"data": records})
+    data = []
+    for x in records:
+        if datetime.datetime.now() > datetime.datetime.strptime(x["end_date"], "%Y-%m-%d %H:%M:%S"):
+            record = DataRequests.objects.get(request_id = x["request_id"])
+            record.status = "expired"
+            record.save()
+
+            x["status"] = "expired"
+
+        data.append({
+            "request_id": x["request_id"],
+            "status": x["status"],
+            "categories": x["type"]["categories"],
+            "user": UserCredentials.objects.filter(user_id = x["donor_id" if role == "doctor" else "requestor_id"]).first().email,
+            "expiry": x["end_date"]
+        })
+
+    return JsonResponse({"data": data})
+
+@csrf_exempt
+def add_request(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
     
+    user_id = int(request.POST.get("user_id"))
+    second_id = request.POST.get("second_id")
+    categories = request.POST.get("type")
+    end_date = request.POST.get("end_date")[:-3]
+
+    try:
+        user = UserCredentials.objects.get(user_id = user_id)
+    except:
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+    
+    try:
+        second = UserCredentials.objects.get(user_id = second_id)
+    except:
+        return JsonResponse({"error": "A user with this second ID does not exist"}, status = 400)
+
+    try:
+        record = DataRequests.objects.get(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date)
+    except:
+        record = DataRequests(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date)
+        record.save()
+
+    return JsonResponse({"message": "Request successfully recorded", "request_id": record.request_id})
+
+@csrf_exempt
+def toggle_request(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
+
+    request_id = int(request.POST.get("request_id"))
+    status = request.POST.get("status")
+
+    try:
+        record = DataRequests.objects.get(request_id = request_id)
+        record.status = status
+        record.save()
+    except:
+        return JsonResponse({"message": "Request status could not be changed"}, status = 520)
+
+    return JsonResponse({"message": "Request status successfully changed"})
+
+@csrf_exempt
+def withdraw_request(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
+
+    request_id = int(request.POST.get("request_id"))
+
+    try:
+        record = DataRequests.objects.get(request_id = request_id)
+        record.delete()
+        return JsonResponse({"message": "Request successfully deleted"})
+    except:
+        return JsonResponse({"error": "Request could not be deleted"})

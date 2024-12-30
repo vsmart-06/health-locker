@@ -1,9 +1,13 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
+import "package:http/http.dart";
 import "package:loading_animation_widget/loading_animation_widget.dart";
 import "package:src/services/secure_storage.dart";
 import "package:src/widgets/file_button.dart";
 import "package:src/widgets/logout_button.dart";
+import "package:src/widgets/request_card.dart";
 
 class PatientHome extends StatefulWidget {
   const PatientHome({super.key});
@@ -12,12 +16,27 @@ class PatientHome extends StatefulWidget {
   State<PatientHome> createState() => _PatientHomeState();
 }
 
-class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStateMixin {
+class _PatientHomeState extends State<PatientHome>
+    with SingleTickerProviderStateMixin {
   late int user_id;
+  late String role;
   bool login = false;
+
+  List requests = [];
 
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
   late TabController controller;
+
+  String baseUrl = "http://127.0.0.1:8000/health_locker";
+
+  Future<void> getRequests() async {
+    var response = await post(Uri.parse(baseUrl + "/fetch-requests/"),
+        body: {"user_id": user_id.toString(), "role": role});
+    List data = jsonDecode(response.body)["data"];
+    setState(() {
+      requests = data;
+    });
+  }
 
   Future<bool> checkLogin() async {
     Map<String, String> info = await SecureStorage.read();
@@ -33,12 +52,14 @@ class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStat
   Future<void> loadUserId() async {
     if (await checkLogin()) {
       String? num = await SecureStorage.read("user_id");
+      String? r = await SecureStorage.read("role");
       setState(() {
         user_id = int.parse(num!);
+        role = r!;
         login = true;
       });
-    }
-    else {
+      await getRequests();
+    } else {
       await SecureStorage.delete();
       Navigator.pushNamedAndRemoveUntil(context, "/", (route) => route == "/");
     }
@@ -54,19 +75,16 @@ class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    if (!login) return LoadingAnimationWidget.inkDrop(color: Colors.blue, size: 100);
+    if (!login)
+      return LoadingAnimationWidget.inkDrop(color: Colors.blue, size: 100);
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text("Home", style: TextStyle(fontFamily: primaryFont)),
+        title: Text("Home", style: TextStyle(fontFamily: primaryFont)),
         centerTitle: true,
         actions: [LogoutButton()],
         bottom: TabBar(
           controller: controller,
-          tabs: [
-            Tab(text: "Records"),
-            Tab(text: "Requests")
-          ],
+          tabs: [Tab(text: "Records"), Tab(text: "Requests")],
           labelStyle: TextStyle(fontFamily: primaryFont),
         ),
       ),
@@ -87,7 +105,8 @@ class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStat
                         displayText: "Discharge Summaries",
                         redirectUrl: "/discharge"),
                     FileButton(
-                        displayText: "Health Documents", redirectUrl: "/health"),
+                        displayText: "Health Documents",
+                        redirectUrl: "/health"),
                     FileButton(
                         displayText: "Immunization Records",
                         redirectUrl: "/immunization"),
@@ -103,21 +122,35 @@ class _PatientHomeState extends State<PatientHome> with SingleTickerProviderStat
                         displayText: "Prescriptions",
                         redirectUrl: "/prescriptions"),
                     FileButton(
-                        displayText: "Wellness Records", redirectUrl: "/wellness"),
-                    FileButton(displayText: "Invoices", redirectUrl: "/invoices"),
+                        displayText: "Wellness Records",
+                        redirectUrl: "/wellness"),
+                    FileButton(
+                        displayText: "Invoices", redirectUrl: "/invoices"),
                   ],
                 ),
               ],
             ),
           ),
-          Container()
+          Column(
+            children: requests
+                .map((request) => DataRequest(
+                    request_id: request["request_id"],
+                    status: request["status"],
+                    categories: request["categories"],
+                    other: request["user"],
+                    expiration: request["expiry"],
+                    role: role))
+                .toList(),
+          )
         ],
       ),
-      floatingActionButton: (controller.index == 0) ? FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, "/upload");
-          },
-          child: Icon(Icons.add)) : null,
+      floatingActionButton: (controller.index == 0)
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, "/upload");
+              },
+              child: Icon(Icons.add))
+          : null,
     );
   }
 }

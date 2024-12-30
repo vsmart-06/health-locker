@@ -6,6 +6,7 @@ import "package:loading_animation_widget/loading_animation_widget.dart";
 import "package:src/services/secure_storage.dart";
 import "package:src/widgets/logout_button.dart";
 import "package:http/http.dart";
+import "package:src/widgets/request_card.dart";
 
 class DoctorHome extends StatefulWidget {
   const DoctorHome({super.key});
@@ -19,15 +20,20 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
   late String role;
   bool login = false;
 
+  List requests = [];
+
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
   late TabController controller;
 
   String baseUrl = "http://127.0.0.1:8000/health_locker";
 
-  void getData() async {
-    await loadUserId();
-    var response = await post(Uri.parse(baseUrl + "/fetch-requests/"), body: {"user_id": user_id.toString(), "role": role});
-    List info = jsonDecode(response.body)["data"];
+  Future<void> getRequests() async {
+    var response = await post(Uri.parse(baseUrl + "/fetch-requests/"),
+        body: {"user_id": user_id.toString(), "role": role});
+    List data = jsonDecode(response.body)["data"];
+    setState(() {
+      requests = data;
+    });
   }
 
   Future<bool> checkLogin() async {
@@ -44,10 +50,13 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
   Future<void> loadUserId() async {
     if (await checkLogin()) {
       String? num = await SecureStorage.read("user_id");
+      String? r = await SecureStorage.read("role");
       setState(() {
         user_id = int.parse(num!);
+        role = r!;
         login = true;
       });
+      await getRequests();
     }
     else {
       await SecureStorage.delete();
@@ -58,7 +67,8 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    getData();
+    loadUserId();
+    print(DateTime.now());
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() => setState(() {}));
   }
@@ -85,13 +95,21 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
         controller: controller,
         children: [
           Container(),
-          Container()
+          Column(
+            children: requests
+                .map((request) => DataRequest(
+                    request_id: request["request_id"],
+                    status: request["status"],
+                    categories: request["categories"],
+                    other: request["user"],
+                    expiration: request["expiry"],
+                    role: role))
+                .toList(),
+          )
         ],
       ),
       floatingActionButton: (controller.index == 0) ? FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, "/upload");
-          },
+          onPressed: () {},
           child: Icon(Icons.add)) : null,
     );
   }
