@@ -11,6 +11,7 @@ class DataRequest extends StatefulWidget {
   String? other;
   String? expiration;
   String? role;
+  Function? callback;
   DataRequest(
       {super.key,
       required this.request_id,
@@ -18,7 +19,8 @@ class DataRequest extends StatefulWidget {
       required this.categories,
       required this.other,
       required this.expiration,
-      required this.role});
+      required this.role,
+      required this.callback});
 
   @override
   State<DataRequest> createState() => _DataRequestState();
@@ -73,7 +75,7 @@ class _DataRequestState extends State<DataRequest> {
               await post(Uri.parse(baseUrl + "/withdraw-request/"), body: {
                 "request_id": widget.request_id.toString(),
               });
-              Navigator.pop(dialogContext);
+              Navigator.of(dialogContext).pop();
             }
           },
           child: Padding(
@@ -109,7 +111,7 @@ class _DataRequestState extends State<DataRequest> {
               child: TextButton(
                 onPressed: () => showDialog(
                     context: context,
-                    builder: (BuildContext context) {
+                    builder: (BuildContext dContext) {
                       return Dialog(
                         insetAnimationDuration: Duration(milliseconds: 50),
                         shadowColor: Colors.transparent,
@@ -173,9 +175,9 @@ class _DataRequestState extends State<DataRequest> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 toggleWidget(
-                                                    "approved", context),
+                                                    "approved", dContext),
                                                 toggleWidget(
-                                                    "declined", context)
+                                                    "declined", dContext)
                                               ],
                                             ),
                                           )
@@ -186,7 +188,7 @@ class _DataRequestState extends State<DataRequest> {
                           ),
                         ),
                       );
-                    }),
+                    }).then((value) => widget.callback!()),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Row(

@@ -68,7 +68,6 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     loadUserId();
-    print(DateTime.now());
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() => setState(() {}));
   }
@@ -103,7 +102,8 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
                     categories: request["categories"],
                     other: request["user"],
                     expiration: request["expiry"],
-                    role: role))
+                    role: role,
+                    callback: () {setState(() async {await getRequests();});},))
                 .toList(),
           )
         ],

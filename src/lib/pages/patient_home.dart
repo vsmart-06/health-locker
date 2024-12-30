@@ -5,7 +5,7 @@ import "package:google_fonts/google_fonts.dart";
 import "package:http/http.dart";
 import "package:loading_animation_widget/loading_animation_widget.dart";
 import "package:src/services/secure_storage.dart";
-import "package:src/widgets/file_button.dart";
+import "package:src/widgets/category_button.dart";
 import "package:src/widgets/logout_button.dart";
 import "package:src/widgets/request_card.dart";
 
@@ -98,16 +98,16 @@ class _PatientHomeState extends State<PatientHome>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    FileButton(
+                    CategoryButton(
                         displayText: "Diagnostic Reports",
                         redirectUrl: "/diagnostics"),
-                    FileButton(
+                    CategoryButton(
                         displayText: "Discharge Summaries",
                         redirectUrl: "/discharge"),
-                    FileButton(
+                    CategoryButton(
                         displayText: "Health Documents",
                         redirectUrl: "/health"),
-                    FileButton(
+                    CategoryButton(
                         displayText: "Immunization Records",
                         redirectUrl: "/immunization"),
                   ],
@@ -115,16 +115,16 @@ class _PatientHomeState extends State<PatientHome>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    FileButton(
+                    CategoryButton(
                         displayText: "OP Consult Records",
                         redirectUrl: "/op-consult"),
-                    FileButton(
+                    CategoryButton(
                         displayText: "Prescriptions",
                         redirectUrl: "/prescriptions"),
-                    FileButton(
+                    CategoryButton(
                         displayText: "Wellness Records",
                         redirectUrl: "/wellness"),
-                    FileButton(
+                    CategoryButton(
                         displayText: "Invoices", redirectUrl: "/invoices"),
                   ],
                 ),
@@ -134,12 +134,18 @@ class _PatientHomeState extends State<PatientHome>
           Column(
             children: requests
                 .map((request) => DataRequest(
-                    request_id: request["request_id"],
-                    status: request["status"],
-                    categories: request["categories"],
-                    other: request["user"],
-                    expiration: request["expiry"],
-                    role: role))
+                      request_id: request["request_id"],
+                      status: request["status"],
+                      categories: request["categories"],
+                      other: request["user"],
+                      expiration: request["expiry"],
+                      role: role,
+                      callback: () {
+                        setState(() async {
+                          await getRequests();
+                        });
+                      },
+                    ))
                 .toList(),
           )
         ],

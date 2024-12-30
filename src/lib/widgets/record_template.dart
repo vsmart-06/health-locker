@@ -88,63 +88,75 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
     return previewFile;
   }
 
-  TextButton fileButton(Map info) {
-    TextButton button = TextButton(
-      onLongPress: () {
-        setState(() {
-          if (selected.contains(info["file_name"])) {
-            selected.remove(info["file_name"]);
-          } else {
-            selected.add(info["file_name"]);
-          }
-        });
-        loadData();
-      },
-      onPressed: () {
-        if (selected.isEmpty) {
-          showDialog(context: context, builder: (BuildContext context) {
-            return Dialog(
-              child: previewData(info),
-              insetAnimationDuration: Duration(milliseconds: 50),
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-            );
+  Widget fileButton(Map info) {
+    Widget button = GestureDetector(
+      onSecondaryTap: () {
+          setState(() {
+            if (selected.contains(info["file_name"])) {
+              selected.remove(info["file_name"]);
+            } else {
+              selected.add(info["file_name"]);
+            }
           });
-          return;
-        }
-        setState(() {
-          if (selected.contains(info["file_name"])) {
-            selected.remove(info["file_name"]);
-          } else {
-            selected.add(info["file_name"]);
+          loadData();
+        },
+      child: TextButton(
+        onLongPress: () {
+          setState(() {
+            if (selected.contains(info["file_name"])) {
+              selected.remove(info["file_name"]);
+            } else {
+              selected.add(info["file_name"]);
+            }
+          });
+          loadData();
+        },
+        onPressed: () {
+          if (selected.isEmpty) {
+            showDialog(context: context, builder: (BuildContext context) {
+              return Dialog(
+                child: previewData(info),
+                insetAnimationDuration: Duration(milliseconds: 50),
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+              );
+            });
+            return;
           }
-          
-        });
-        loadData();
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          (info["data"]["extension"] != "pdf")
-              ? ((info["data"]["extension"] != "json") ? Icon(Icons.image) : Icon(Icons.health_and_safety))
-              : Icon(Icons.picture_as_pdf),
-          SizedBox(
-            width: 10,
-          ),
-          Text(
-            info["data"]["file_name"],
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-      style: ButtonStyle(
-        shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-        minimumSize: WidgetStatePropertyAll(
-            Size(MediaQuery.of(context).size.width * 0.15, 85)),
-        backgroundColor: (!selected.contains(info["file_name"])) ? WidgetStatePropertyAll(Colors.grey[300]) : WidgetStatePropertyAll(Colors.lightBlue[100]),
-        foregroundColor: WidgetStatePropertyAll(Colors.black),
+          setState(() {
+            if (selected.contains(info["file_name"])) {
+              selected.remove(info["file_name"]);
+            } else {
+              selected.add(info["file_name"]);
+            }
+            
+          });
+          loadData();
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            (info["data"]["extension"] != "pdf")
+                ? ((info["data"]["extension"] != "json") ? Icon(Icons.image) : Icon(Icons.health_and_safety))
+                : Icon(Icons.picture_as_pdf),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              info["data"]["file_name"],
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+          minimumSize: WidgetStatePropertyAll(
+              Size(MediaQuery.of(context).size.width * 0.15, 85)),
+          backgroundColor: (!selected.contains(info["file_name"])) ? WidgetStatePropertyAll(Colors.grey[300]) : WidgetStatePropertyAll(Colors.lightBlue[100]),
+          foregroundColor: WidgetStatePropertyAll(Colors.black),
+        ),
       ),
     );
 
