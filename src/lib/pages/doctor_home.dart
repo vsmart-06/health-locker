@@ -103,13 +103,13 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
                     other: request["user"],
                     expiration: request["expiry"],
                     role: role,
-                    callback: () {setState(() async {await getRequests();});},))
+                    callback: () async {await getRequests();},))
                 .toList(),
           )
         ],
       ),
       floatingActionButton: (controller.index == 0) ? FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {Navigator.of(context).pushNamed("/request");},
           child: Icon(Icons.add)) : null,
     );
   }

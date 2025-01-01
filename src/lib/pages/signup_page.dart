@@ -71,9 +71,10 @@ class _SignupState extends State<Signup> {
                 padding: const EdgeInsets.all(20.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                      hintText: "Email",
-                      border: OutlineInputBorder(),
-                      errorText: errors[0] ? "Invalid email" : null
+                    labelText: "Email",
+                    hintText: "Email",
+                    border: OutlineInputBorder(),
+                    errorText: errors[0] ? "Invalid email" : null
                   ),
                   style: TextStyle(fontFamily: primaryFont),
                   autofocus: true,
@@ -88,10 +89,11 @@ class _SignupState extends State<Signup> {
                 padding: const EdgeInsets.all(20.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                      hintText: "Password",
-                      border: OutlineInputBorder(),
-                      errorText: errors[1] ? "Invalid password" : null),
-                      style: TextStyle(fontFamily: primaryFont),
+                    labelText: "Password",
+                    hintText: "Password",
+                    border: OutlineInputBorder(),
+                    errorText: errors[1] ? "Invalid password" : null),
+                    style: TextStyle(fontFamily: primaryFont),
                   obscureText: true,
                   onChanged: (value) {
                     setState(() {

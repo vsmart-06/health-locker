@@ -84,6 +84,7 @@ class _LoginState extends State<Login> {
                 padding: const EdgeInsets.all(20.0),
                 child: TextFormField(
                   decoration: InputDecoration(
+                    labelText: "Email",
                     hintText: "Email",
                     border: OutlineInputBorder(),
                     errorText: errors[0] ? "Email cannot be empty" : null
@@ -101,6 +102,7 @@ class _LoginState extends State<Login> {
                 padding: const EdgeInsets.all(20.0),
                 child: TextFormField(
                   decoration: InputDecoration(
+                    labelText: "Password",
                     hintText: "Password",
                     border: OutlineInputBorder(),
                     errorText: errors[1] ? "Password cannot be empty" : null

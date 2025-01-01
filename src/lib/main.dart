@@ -25,7 +25,7 @@ void main() {
       "/wellness": (context) => RecordsTemplate(title: "Wellness Records"),
       "/invoices": (context) => RecordsTemplate(title: "Invoices"),
       "/upload": (context) => UploadPage(),
-      "/request-data": (context) => RequestPage()
+      "/request": (context) => RequestPage()
     },
     theme: ThemeData(useMaterial3: false),
   ));

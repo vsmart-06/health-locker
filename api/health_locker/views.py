@@ -1,6 +1,7 @@
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 from pydicom import dcmread
 import numpy as np
 from PIL import Image
@@ -240,10 +241,11 @@ def add_request(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
     
-    user_id = int(request.POST.get("user_id"))
-    second_id = request.POST.get("second_id")
-    categories = request.POST.get("type")
-    end_date = request.POST.get("end_date")[:-3]
+    body: dict = json.loads(request.body)
+    user_id = int(body.get("user_id"))
+    second_id = body.get("second_id")
+    categories = body.get("categories")
+    end_date = body.get("end_date")[:-4]
 
     try:
         user = UserCredentials.objects.get(user_id = user_id)
@@ -251,13 +253,15 @@ def add_request(request: HttpRequest):
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
     
     try:
-        second = UserCredentials.objects.get(user_id = second_id)
+        second = UserCredentials.objects.get(email = second_id)
     except:
         return JsonResponse({"error": "A user with this second ID does not exist"}, status = 400)
 
-    try:
-        record = DataRequests.objects.get(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date)
-    except:
+    record = DataRequests.objects.filter(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date).filter(Q(status = "pending") | Q(status = "approved"))
+
+    if list(record.values()) != []:
+        return JsonResponse({"error": "This request has already been made"}, status = 409)
+    else:
         record = DataRequests(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date)
         record.save()
 

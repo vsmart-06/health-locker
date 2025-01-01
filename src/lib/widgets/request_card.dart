@@ -136,7 +136,7 @@ class _DataRequestState extends State<DataRequest> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "Doctor: ${widget.other!}",
+                                          "${(widget.role == 'patient') ? 'Doctor' : 'Patient'}: ${widget.other!}",
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontFamily: primaryFont,
@@ -195,7 +195,7 @@ class _DataRequestState extends State<DataRequest> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Text(
-                          "Doctor: ${widget.other!}",
+                          "${(widget.role == 'patient') ? 'Doctor' : 'Patient'}: ${widget.other!}",
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: primaryFont,

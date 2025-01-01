@@ -22,7 +22,7 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   late int user_id;
   bool login = false;
 
-  List<Widget> rowData = [];
+  List<Widget>? rowData;
   late Map data;
   List selected = [];
 
@@ -166,7 +166,7 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   void loadData() {
     rowData = [];
     for (String x in data.keys) {
-      rowData.add(Padding(
+      rowData!.add(Padding(
         padding: const EdgeInsets.all(20.0),
         child: fileButton(data[x]),
       ));
@@ -246,15 +246,20 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
         actions: [LogoutButton()],
       ),
       body: Scaffold(
-          body: rowData.isEmpty ? Center(child: LoadingAnimationWidget.inkDrop(color: Colors.blue, size: 100)) : Padding(
+          body: (rowData == null) ? Center(child: LoadingAnimationWidget.inkDrop(color: Colors.blue, size: 100)) : (rowData!.isEmpty) ? Center(
+            child: Text(
+              "There are no documents to show",
+              style: TextStyle(fontFamily: primaryFont, fontSize: 30),
+            ),
+          ) : Padding(
               padding: const EdgeInsets.all(20.0),
               child: GridView.count(
                 childAspectRatio:
                     ((MediaQuery.of(context).size.width * 0.15) / 85),
                 shrinkWrap: true,
                 crossAxisCount: 5,
-                children: List.generate(rowData.length, (index) {
-                  return rowData[index];
+                children: List.generate(rowData!.length, (index) {
+                  return rowData![index];
                 }),
               ))),
       floatingActionButton: (selected.isNotEmpty)
