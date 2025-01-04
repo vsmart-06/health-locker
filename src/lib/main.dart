@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:src/pages/doctor_home.dart';
 import 'package:src/pages/login_page.dart';
+import 'package:src/pages/patient_view.dart';
 import 'package:src/pages/request_page.dart';
 import 'package:src/pages/signup_page.dart';
 import "package:src/pages/patient_home.dart";
@@ -16,6 +17,7 @@ void main() {
       "/signup": (context) => Signup(),
       "/home/patient": (context) => PatientHome(),
       "/home/doctor": (context) => DoctorHome(),
+      "/view/patient": (context) => PatientView(),
       "/diagnostics": (context) => RecordsTemplate(title: "Diagnostic Reports"),
       "/discharge": (context) => RecordsTemplate(title: "Discharge Summaries"),
       "/health": (context) => RecordsTemplate(title: "Health Documents"),

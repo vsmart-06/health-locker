@@ -51,6 +51,7 @@ def upload_file(request: HttpRequest):
     file_type = request.POST.get("type")
     user_id = int(request.POST.get("user_id"))
     extension = request.POST.get("extension")
+    patient = request.POST.get("patient")
 
     file_data = {
         "file_name": file.name,
@@ -63,6 +64,12 @@ def upload_file(request: HttpRequest):
     except:
         return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
     
+    if patient:
+        try:
+            user = UserCredentials.objects.get(email = patient)
+        except:
+            return JsonResponse({"error": "A user with this email does not exist"}, status = 403)
+
     try:
         HealthLocker.objects.get(user = user, type = file_type, file_name = file.name)
         return JsonResponse({"error": "A file with that name already exists"}, status = 403)
@@ -78,11 +85,18 @@ def fetch_data(request: HttpRequest):
     
     file_type = request.POST.get("type")
     user_id = int(request.POST.get("user_id"))
+    patient = request.POST.get("patient")
 
     try:
         user = UserCredentials.objects.get(user_id = user_id)
     except:
-        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
+
+    if patient:
+        try:
+            user = UserCredentials.objects.get(email = patient)
+        except:
+            return JsonResponse({"error": "A user with this email does not exist"}, status = 403)
 
     records = HealthLocker.objects.filter(user = user, type = file_type)
 
@@ -117,14 +131,15 @@ def delete_data(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
 
-    files = eval(request.POST.get("files"))
-    user_id = int(request.POST.get("user_id"))
-    file_type = request.POST.get("type")
+    body: dict = json.loads(request.body)
+    files = eval(body.get("files"))
+    user_id = int(body.get("user_id"))
+    file_type = body.get("type")
 
     try:
         user = UserCredentials.objects.get(user_id = user_id)
     except:
-        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
 
     error = False
     for file in files:
@@ -194,7 +209,7 @@ def fetch_requests(request: HttpRequest):
     try:
         user = UserCredentials.objects.get(user_id = user_id)
     except:
-        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
     
     if second_id:
         second_id = int(second_id)
@@ -202,7 +217,7 @@ def fetch_requests(request: HttpRequest):
         try:
             second = UserCredentials.objects.get(user_id = second_id)
         except:
-            return JsonResponse({"error": "A user with this second ID does not exist"}, status = 400)
+            return JsonResponse({"error": "A user with this second ID does not exist"}, status = 403)
 
     if role == "doctor":
         records = DataRequests.objects.filter(requestor = user)
@@ -250,12 +265,12 @@ def add_request(request: HttpRequest):
     try:
         user = UserCredentials.objects.get(user_id = user_id)
     except:
-        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 400)
+        return JsonResponse({"error": "A user with this user ID does not exist"}, status = 403)
     
     try:
         second = UserCredentials.objects.get(email = second_id)
     except:
-        return JsonResponse({"error": "A user with this second ID does not exist"}, status = 400)
+        return JsonResponse({"error": "A user with this second ID does not exist"}, status = 403)
 
     record = DataRequests.objects.filter(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date).filter(Q(status = "pending") | Q(status = "approved"))
 

@@ -21,6 +21,7 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
   bool login = false;
 
   List requests = [];
+  Map patients = {};
 
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
   late TabController controller;
@@ -31,8 +32,22 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
     var response = await post(Uri.parse(baseUrl + "/fetch-requests/"),
         body: {"user_id": user_id.toString(), "role": role});
     List data = jsonDecode(response.body)["data"];
+
+    Map people = {};
+    for (Map request in data) {
+      if (request["status"] == "approved") {
+        if (!people.containsKey(request["user"])) {
+          people[request["user"]] = request["categories"];
+        }
+        else {
+          people[request["user"]] += request["categories"];
+        }
+      }
+    }
+
     setState(() {
       requests = data;
+      patients = people;
     });
   }
 
@@ -64,12 +79,46 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
     }
   }
 
+  Widget patientButton(String name) {
+    Widget button = TextButton(
+      onPressed: () {
+        SecureStorage.writeOne("patient_email", name);
+        SecureStorage.writeOne("patient_categories", jsonEncode(patients[name]));
+        Navigator.of(context).pushNamed("/view/patient");
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.folder),
+          SizedBox(
+            width: 10,
+          ),
+          Text(
+            name,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+      style: ButtonStyle(
+        shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+        minimumSize: WidgetStatePropertyAll(
+            Size(MediaQuery.of(context).size.width * 0.15, 85)),
+        backgroundColor: WidgetStatePropertyAll(Colors.grey[300]),
+        foregroundColor: WidgetStatePropertyAll(Colors.black),
+      ),
+    );
+
+    return button;
+  }
+
   @override
   void initState() {
     super.initState();
     loadUserId();
     controller = TabController(length: 2, vsync: this);
-    controller.addListener(() => setState(() {}));
+    controller.addListener(() => setState(() {getRequests();}));
   }
 
   @override
@@ -93,7 +142,19 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
       body: TabBarView(
         controller: controller,
         children: [
-          Container(),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: GridView.count(
+              childAspectRatio:
+                  ((MediaQuery.of(context).size.width * 0.15) / 85),
+              shrinkWrap: true,
+              crossAxisCount: 5,
+              children: patients.keys.map((value) => Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: patientButton(value),
+              )).toList(),
+            )
+          ),
           Column(
             children: requests
                 .map((request) => DataRequest(

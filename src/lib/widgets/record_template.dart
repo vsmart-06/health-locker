@@ -20,6 +20,7 @@ class RecordsTemplate extends StatefulWidget {
 
 class _RecordsTemplateState extends State<RecordsTemplate> {
   late int user_id;
+  late String role;
   bool login = false;
 
   List<Widget>? rowData;
@@ -32,9 +33,19 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
 
   void getData() async {
     await loadUserId();
-    var response = await post(
+    Response response;
+    if (role == "patient") {
+      response = await post(
         Uri.parse(baseUrl + "/fetch-data/"),
         body: {"type": widget.title, "user_id": user_id.toString()});
+    }
+    else {
+      String? patient = await SecureStorage.read("patient_email");
+      response = await post(
+        Uri.parse(baseUrl + "/fetch-data/"),
+        body: {"type": widget.title, "user_id": user_id.toString(), "patient": patient!});
+    }
+
     var info = jsonDecode(response.body)["data"];
     setState(() {
       data = info;
@@ -89,49 +100,90 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   }
 
   Widget fileButton(Map info) {
-    Widget button = GestureDetector(
-      onSecondaryTap: () {
-          setState(() {
-            if (selected.contains(info["file_name"])) {
-              selected.remove(info["file_name"]);
-            } else {
-              selected.add(info["file_name"]);
-            }
-          });
-          loadData();
-        },
-      child: TextButton(
-        onLongPress: () {
-          setState(() {
-            if (selected.contains(info["file_name"])) {
-              selected.remove(info["file_name"]);
-            } else {
-              selected.add(info["file_name"]);
-            }
-          });
-          loadData();
-        },
-        onPressed: () {
-          if (selected.isEmpty) {
-            showDialog(context: context, builder: (BuildContext context) {
-              return Dialog(
-                child: previewData(info),
-                insetAnimationDuration: Duration(milliseconds: 50),
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-              );
+    Widget button;
+    if (role == "patient") {
+      button = GestureDetector(
+        onSecondaryTap: () {
+            setState(() {
+              if (selected.contains(info["file_name"])) {
+                selected.remove(info["file_name"]);
+              } else {
+                selected.add(info["file_name"]);
+              }
             });
-            return;
-          }
-          setState(() {
-            if (selected.contains(info["file_name"])) {
-              selected.remove(info["file_name"]);
-            } else {
-              selected.add(info["file_name"]);
+            loadData();
+          },
+        child: TextButton(
+          onLongPress: () {
+            setState(() {
+              if (selected.contains(info["file_name"])) {
+                selected.remove(info["file_name"]);
+              } else {
+                selected.add(info["file_name"]);
+              }
+            });
+            loadData();
+          },
+          onPressed: () {
+            if (selected.isEmpty) {
+              showDialog(context: context, builder: (BuildContext context) {
+                return Dialog(
+                  child: previewData(info),
+                  insetAnimationDuration: Duration(milliseconds: 50),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                );
+              });
+              return;
             }
-            
+            setState(() {
+              if (selected.contains(info["file_name"])) {
+                selected.remove(info["file_name"]);
+              } else {
+                selected.add(info["file_name"]);
+              }
+              
+            });
+            loadData();
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              (info["data"]["extension"] != "pdf")
+                  ? ((info["data"]["extension"] != "json") ? Icon(Icons.image) : Icon(Icons.health_and_safety))
+                  : Icon(Icons.picture_as_pdf),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                info["data"]["file_name"],
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          style: ButtonStyle(
+            shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            minimumSize: WidgetStatePropertyAll(
+                Size(MediaQuery.of(context).size.width * 0.15, 85)),
+            backgroundColor: (!selected.contains(info["file_name"])) ? WidgetStatePropertyAll(Colors.grey[300]) : WidgetStatePropertyAll(Colors.lightBlue[100]),
+            foregroundColor: WidgetStatePropertyAll(Colors.black),
+          ),
+        ),
+      );
+    }
+    else {
+      button = TextButton(
+        onPressed: () {
+          showDialog(context: context, builder: (BuildContext context) {
+            return Dialog(
+              child: previewData(info),
+              insetAnimationDuration: Duration(milliseconds: 50),
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+            );
           });
-          loadData();
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -154,11 +206,11 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
           minimumSize: WidgetStatePropertyAll(
               Size(MediaQuery.of(context).size.width * 0.15, 85)),
-          backgroundColor: (!selected.contains(info["file_name"])) ? WidgetStatePropertyAll(Colors.grey[300]) : WidgetStatePropertyAll(Colors.lightBlue[100]),
+          backgroundColor: WidgetStatePropertyAll(Colors.grey[300]),
           foregroundColor: WidgetStatePropertyAll(Colors.black),
         ),
-      ),
-    );
+      );
+    }
 
     return button;
   }
@@ -177,18 +229,9 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   }
 
   void deleteData() async {
-    String files = "[";
-    for (int i = 0; i < selected.length; i++) {
-      files += "\"${selected[i]}\"";
-      if (i != selected.length-1) {
-        files += ", ";
-      }
-    }
-    files += "]";
-
     var response = await post(
         Uri.parse(baseUrl + "/delete-data/"),
-        body: {"type": widget.title, "user_id": user_id.toString(), "files": files});
+        body: jsonEncode({"type": widget.title, "user_id": user_id.toString(), "files": selected}));
 
     if (response.statusCode != 200) {
       print("Error occured");
@@ -216,8 +259,10 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
   Future<void> loadUserId() async {
     if (await checkLogin()) {
       String? num = await SecureStorage.read("user_id");
+      String? r = await SecureStorage.read("role");
       setState(() {
         user_id = int.parse(num!);
+        role = r!;
         login = true;
       });
     }
@@ -258,9 +303,7 @@ class _RecordsTemplateState extends State<RecordsTemplate> {
                     ((MediaQuery.of(context).size.width * 0.15) / 85),
                 shrinkWrap: true,
                 crossAxisCount: 5,
-                children: List.generate(rowData!.length, (index) {
-                  return rowData![index];
-                }),
+                children: rowData!
               ))),
       floatingActionButton: (selected.isNotEmpty)
           ? FloatingActionButton(

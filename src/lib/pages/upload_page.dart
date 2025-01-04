@@ -17,7 +17,9 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> {
   late int user_id;
+  late String role;
   bool login = false;
+  List? categories;
 
   List<String> typeList = [
     "Choose a data type",
@@ -97,6 +99,10 @@ class _UploadPageState extends State<UploadPage> {
       request.fields["extension"] = type!;
       await loadUserId();
       request.fields["user_id"] = user_id.toString();
+      if (role == "doctor") {
+        String? email = await SecureStorage.read("patient_email");
+        request.fields["patient"] = email!;
+      }
       var response = await Response.fromStream(await request.send());
 
       if (response.statusCode != 200) {
@@ -131,9 +137,21 @@ class _UploadPageState extends State<UploadPage> {
   Future<void> loadUserId() async {
     if (await checkLogin()) {
       String? num = await SecureStorage.read("user_id");
+      String? r = await SecureStorage.read("role");
+      List<String>? cats;
+      if (r == "doctor") {
+        String? c = await SecureStorage.read("patient_categories");
+        List cat = jsonDecode(c!);
+        cats = cat.cast();
+      }
       setState(() {
         user_id = int.parse(num!);
+        role = r!;
         login = true;
+        categories = cats;
+        if (cats != null) {
+          typeList = ["Choose a data type"] + cats;
+        }
       });
     }
     else {

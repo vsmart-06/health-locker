@@ -70,7 +70,7 @@ class _PatientHomeState extends State<PatientHome>
     super.initState();
     loadUserId();
     controller = TabController(length: 2, vsync: this);
-    controller.addListener(() => setState(() {}));
+    controller.addListener(() => setState(() {getRequests();}));
   }
 
   @override
