@@ -33,6 +33,8 @@ class _PatientHomeState extends State<PatientHome>
     var response = await post(Uri.parse(baseUrl + "/fetch-requests/"),
         body: {"user_id": user_id.toString(), "role": role});
     List data = jsonDecode(response.body)["data"];
+    data.sort((a, b) => DateTime.parse(b["request_date"])
+        .compareTo(DateTime.parse(a["request_date"])));
     setState(() {
       requests = data;
     });

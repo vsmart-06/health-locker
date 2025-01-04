@@ -22,6 +22,7 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
 
   List requests = [];
   Map patients = {};
+  List patient_names = [];
 
   String? primaryFont = GoogleFonts.redHatDisplay().fontFamily;
   late TabController controller;
@@ -32,6 +33,7 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
     var response = await post(Uri.parse(baseUrl + "/fetch-requests/"),
         body: {"user_id": user_id.toString(), "role": role});
     List data = jsonDecode(response.body)["data"];
+    data.sort((a, b) => DateTime.parse(b["request_date"]).compareTo(DateTime.parse(a["request_date"])));
 
     Map people = {};
     for (Map request in data) {
@@ -45,9 +47,12 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
       }
     }
 
+    List names = people.keys.toList();
+    names.sort();
     setState(() {
       requests = data;
       patients = people;
+      patient_names = names;
     });
   }
 
@@ -149,7 +154,7 @@ class _DoctorHomeState extends State<DoctorHome> with SingleTickerProviderStateM
                   ((MediaQuery.of(context).size.width * 0.15) / 85),
               shrinkWrap: true,
               crossAxisCount: 5,
-              children: patients.keys.map((value) => Padding(
+              children: patient_names.map((value) => Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: patientButton(value),
               )).toList(),

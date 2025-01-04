@@ -246,7 +246,8 @@ def fetch_requests(request: HttpRequest):
             "status": x["status"],
             "categories": x["type"]["categories"],
             "user": UserCredentials.objects.filter(user_id = x["donor_id" if role == "doctor" else "requestor_id"]).first().email,
-            "expiry": x["end_date"]
+            "expiry": x["end_date"],
+            "request_date": x["request_date"]
         })
 
     return JsonResponse({"data": data})
@@ -277,7 +278,7 @@ def add_request(request: HttpRequest):
     if list(record.values()) != []:
         return JsonResponse({"error": "This request has already been made"}, status = 409)
     else:
-        record = DataRequests(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date)
+        record = DataRequests(requestor = user, donor = second, type = {"categories": categories}, end_date = end_date, request_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         record.save()
 
     return JsonResponse({"message": "Request successfully recorded", "request_id": record.request_id})

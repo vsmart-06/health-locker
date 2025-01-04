@@ -41,11 +41,25 @@ class _PatientViewState extends State<PatientView> {
     if (await checkLogin()) {
       String? num = await SecureStorage.read("user_id");
       String? r = await SecureStorage.read("role");
-      String? cats = await SecureStorage.read("patient_categories");
+      String? c = await SecureStorage.read("patient_categories");
       String? e = await SecureStorage.read("patient_email");
 
+      List<String> typeList = [
+        "Choose a data type",
+        "Diagnostic Reports",
+        "Discharge Summaries",
+        "Health Documents",
+        "Immunization Records",
+        "OP Consult Records",
+        "Prescriptions",
+        "Wellness Records",
+        "Invoices"
+      ];
+      List cats = jsonDecode(c!);
+      cats.sort((a, b) => typeList.indexOf(a) - typeList.indexOf(b));
+
       Map<String, String> y = {};
-      for (String x in jsonDecode(cats!)) {
+      for (String x in cats) {
         switch (x) {
           case ("Diagnostic Reports"): y[x] = "/diagnostics"; break;
           case ("Discharge Summaries"): y[x] = "/discharge"; break;

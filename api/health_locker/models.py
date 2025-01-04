@@ -52,4 +52,5 @@ class DataRequests(models.Model):
     donor = models.ForeignKey(UserCredentials, related_name = "donor", on_delete = models.CASCADE, null = False)
     type = models.JSONField(unique = False, null = False)
     end_date = models.TextField(unique = False, null = False)
+    request_date = models.TextField(unique = False, null = False)
     status = models.TextField(default = "pending", unique = False, null = False)
