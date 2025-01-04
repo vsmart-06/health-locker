@@ -6,7 +6,7 @@ import 'package:src/pages/request_page.dart';
 import 'package:src/pages/signup_page.dart';
 import "package:src/pages/patient_home.dart";
 import "package:src/pages/upload_page.dart";
-import 'package:src/widgets/record_template.dart';
+import 'package:src/pages/record_template.dart';
 import "dart:html";
 
 void main() {
