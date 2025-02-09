@@ -288,7 +288,7 @@ class _UploadPageState extends State<UploadPage> {
                     style: TextStyle(fontFamily: primaryFont)),
               )
             : Container(),
-        (error)
+        (error && !sent)
             ? Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Text("A file with this name already exists",
